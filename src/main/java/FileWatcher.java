@@ -47,6 +47,26 @@ public class FileWatcher {
     private final boolean recursive;
     private boolean trace = false;
 
+  /**
+     * Creates a WatchService and registers the given directory
+     */
+    FileWatcher(Path dir, boolean recursive) throws IOException {
+        this.watcher = FileSystems.getDefault().newWatchService();
+        this.keys = new HashMap<WatchKey,Path>();
+        this.recursive = recursive;
+
+        if (recursive) {
+            System.out.format("Scanning %s ...\n", dir);
+            registerAll(dir);
+            System.out.println("Done.");
+        } else {
+            register(dir);
+        }
+
+        // enable trace after initial registration
+        this.trace = true;
+    }
+
     @SuppressWarnings("unchecked")
     static <T> WatchEvent<T> cast(WatchEvent<?> event) {
         return (WatchEvent<T>)event;
@@ -87,25 +107,6 @@ public class FileWatcher {
         });
     }
 
-    /**
-     * Creates a WatchService and registers the given directory
-     */
-    FileWatcher(Path dir, boolean recursive) throws IOException {
-        this.watcher = FileSystems.getDefault().newWatchService();
-        this.keys = new HashMap<WatchKey,Path>();
-        this.recursive = recursive;
-
-        if (recursive) {
-            System.out.format("Scanning %s ...\n", dir);
-            registerAll(dir);
-            System.out.println("Done.");
-        } else {
-            register(dir);
-        }
-
-        // enable trace after initial registration
-        this.trace = true;
-    }
 
     /**
      * Process all events for keys queued to the watcher
