@@ -36,6 +36,8 @@ import java.nio.file.attribute.*;
 import java.io.*;
 import java.util.*;
 
+import org.apache.tika.Tika;
+
 /**
  * Example to watch a directory (or tree) for changes to files.
  */
@@ -138,11 +140,41 @@ public class FileWatcher {
 
                 // Context for directory entry event is the file name of entry
                 WatchEvent<Path> ev = cast(event);
-                Path name = ev.context();
-                Path child = dir.resolve(name);
+                Path filename = ev.context();
+                Path child = dir.resolve(filename);
+                Tika tika = new Tika();
 
-                // print out event
-                System.out.format("%s: %s\n", event.kind().name(), child);
+                try {
+                    // print out event
+                    System.out.format("%s: %s\n", event.kind().name(), child);
+                    System.out.println(tika.detect(child));
+
+                    // ignore file system files and temp files
+                    if (!"application/octet-stream".equals(tika.detect(child))) {
+                        System.out.println("this is an syncable file");
+
+                        if (kind == ENTRY_CREATE) {
+                            new S3Operations(child).add();
+                        }
+
+                        if (kind == ENTRY_MODIFY) {
+                            new S3Operations(child).update();
+                        }
+
+                        new S3Operations(child).list();
+                    }
+
+                } catch (NoSuchFileException notFound) {
+                    if (kind == ENTRY_DELETE) {
+                        new S3Operations(child).delete();
+                    }
+                    new S3Operations(child).list();
+                } catch (IOException x) {
+                    System.err.println(x);
+                }
+
+
+
 
                 // if directory is created, and watching recursively, then
                 // register it and its sub-directories
