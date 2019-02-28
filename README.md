@@ -8,6 +8,7 @@ A Dropbox clone for learning JUnit
 
 ## Limitations
 1. In order to delete a directory you must delete all the items in the directory
-2. You cannot add a directory with files; the files will be ignored.
-  2a. First, create a directory
-  2b. Then add the desired files
+2. You cannot add a directory with files; the files will be ignored. First, create a directory. Then add the desired files
+
+### Note
+Keep an eye out for more ease of use features once I have time to focus on this project more, check out the issues tab for planned features!
