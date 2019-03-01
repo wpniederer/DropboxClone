@@ -3,7 +3,8 @@ A Dropbox clone for learning JUnit
 
 ## How to use
 1. Import the project using Maven
-2. Pass in directory file
+2. Edit syncDir var in StorageDrive
+3. Edit bucket var in S3Operations
 3. Add files to to that directory
 
 ## Limitations
@@ -11,4 +12,5 @@ A Dropbox clone for learning JUnit
 2. You cannot add a directory with files; the files will be ignored. First, create a directory. Then add the desired files
 
 ### Note
+This is a prototype:
 Keep an eye out for more ease of use features once I have time to focus on this project more, check out the issues tab for planned features!
