@@ -14,6 +14,7 @@ A Dropbox clone for learning JUnit
 
 ## About Unit tests
 1. Make sure to do the IntegrationTest before adding anything to the s3 bucket.
+2. S3OperationsTest not working
 
 ### Note
 This is a prototype:
