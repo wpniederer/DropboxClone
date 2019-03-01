@@ -31,31 +31,26 @@
 
 import java.nio.file.*;
 import static java.nio.file.StandardWatchEventKinds.*;
-import static java.nio.file.LinkOption.*;
 import java.nio.file.attribute.*;
 import java.io.*;
 import java.util.*;
 
-import org.apache.tika.Tika;
 
 /**
  * Example to watch a directory (or tree) for changes to files.
  */
-
 public class FileWatcher {
 
     private final WatchService watcher;
-    private final Map<WatchKey,Path> keys;
-    private final boolean recursive;
+    private final Map<WatchKey, Path> keys;
     private boolean trace = false;
 
-  /**
+    /**
      * Creates a WatchService and registers the given directory
      */
     FileWatcher(Path dir, boolean recursive) throws IOException {
         this.watcher = FileSystems.getDefault().newWatchService();
-        this.keys = new HashMap<WatchKey,Path>();
-        this.recursive = recursive;
+        this.keys = new HashMap<WatchKey, Path>();
 
         if (recursive) {
             System.out.format("Scanning %s ...\n", dir);
@@ -71,7 +66,7 @@ public class FileWatcher {
 
     @SuppressWarnings("unchecked")
     static <T> WatchEvent<T> cast(WatchEvent<?> event) {
-        return (WatchEvent<T>)event;
+        return (WatchEvent<T>) event;
     }
 
     /**
@@ -96,13 +91,12 @@ public class FileWatcher {
      * Register the given directory, and all its sub-directories, with the
      * WatchService.
      */
-    private void registerAll(final Path start) throws IOException {
+    public void registerAll(final Path start) throws IOException {
         // register directory and sub-directories
         Files.walkFileTree(start, new SimpleFileVisitor<Path>() {
             @Override
             public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs)
-                    throws IOException
-            {
+                    throws IOException {
                 register(dir);
                 return FileVisitResult.CONTINUE;
             }
@@ -110,96 +104,34 @@ public class FileWatcher {
     }
 
 
-    /**
-     * Process all events for keys queued to the watcher
-     */
-    void processEvents() {
-        for (;;) {
-
-            // wait for key to be signalled
-            WatchKey key;
-            try {
-                key = watcher.take();
-            } catch (InterruptedException x) {
-                return;
-            }
-
-            Path dir = keys.get(key);
-            if (dir == null) {
-                System.err.println("WatchKey not recognized!!");
-                continue;
-            }
-
-            for (WatchEvent<?> event: key.pollEvents()) {
-                WatchEvent.Kind kind = event.kind();
-
-                // TBD - provide example of how OVERFLOW event is handled
-                if (kind == OVERFLOW) {
-                    continue;
-                }
-
-                // Context for directory entry event is the file name of entry
-                WatchEvent<Path> ev = cast(event);
-                Path filename = ev.context();
-                Path child = dir.resolve(filename);
-                Tika tika = new Tika();
-
-                try {
-                    // print out event
-                    System.out.format("%s: %s\n", event.kind().name(), child);
-                    System.out.println(tika.detect(child));
-
-                    // ignore file system files and temp files
-                    if (!"application/octet-stream".equals(tika.detect(child))) {
-                        System.out.println("this is an syncable file");
-
-                        if (kind == ENTRY_CREATE) {
-                            new S3Operations(child).add();
-                        }
-
-                        if (kind == ENTRY_MODIFY) {
-                            new S3Operations(child).update();
-                        }
-
-                        new S3Operations(child).list();
-                    }
-
-                } catch (NoSuchFileException notFound) {
-                    if (kind == ENTRY_DELETE) {
-                        new S3Operations(child).delete();
-                    }
-                    new S3Operations(child).list();
-                } catch (IOException x) {
-                    System.err.println(x);
-                }
-
-
-
-
-                // if directory is created, and watching recursively, then
-                // register it and its sub-directories
-                if (recursive && (kind == ENTRY_CREATE)) {
-                    try {
-                        if (Files.isDirectory(child, NOFOLLOW_LINKS)) {
-                            registerAll(child);
-                        }
-                    } catch (IOException x) {
-                        // ignore to keep sample readbale
-                    }
-                }
-            }
-
-            // reset key and remove from set if directory no longer accessible
-            boolean valid = key.reset();
-            if (!valid) {
-                keys.remove(key);
-
-                // all directories are inaccessible
-                if (keys.isEmpty()) {
-                    break;
-                }
-            }
+    // Waits for key to be signalled
+    public WatchKey getKey() {
+        WatchKey key;
+        try {
+            key = watcher.take();
+        } catch (InterruptedException x) {
+            return null;
         }
+
+        return key;
+    }
+
+    public Path keyToDir(WatchKey key) {
+        Path dir = keys.get(key);
+
+        if (dir == null) {
+            return null;
+        }
+
+        return dir;
+    }
+
+    public void removeKeyFromKeys(WatchKey key) {
+        keys.remove(key);
+    }
+
+    public boolean isEmpty() {
+        return keys.isEmpty();
     }
 
 
