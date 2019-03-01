@@ -10,8 +10,8 @@ import static java.nio.file.StandardWatchEventKinds.*;
 public class StorageDriver {
 
     // Watches files and syncs as needed
-    private static void driver() throws IOException{
-        FileWatcher watchDir = new FileWatcher(Paths.get("my_dir"), true);
+    private static void driver() throws IOException {
+        FileWatcher watchDir = new FileWatcher(Paths.get("my_dir"));
 
         for (;;) {
 
@@ -25,7 +25,6 @@ public class StorageDriver {
             for (WatchEvent<?> event: key.pollEvents()) {
                 WatchEvent.Kind kind = event.kind();
 
-                // TBD - provide example of how OVERFLOW event is handled
                 if (kind == OVERFLOW) {
                     continue;
                 }
