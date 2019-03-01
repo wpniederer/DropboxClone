@@ -48,17 +48,13 @@ public class FileWatcher {
     /**
      * Creates a WatchService and registers the given directory
      */
-    FileWatcher(Path dir, boolean recursive) throws IOException {
+    FileWatcher(Path dir) throws IOException {
         this.watcher = FileSystems.getDefault().newWatchService();
         this.keys = new HashMap<WatchKey, Path>();
 
-        if (recursive) {
-            System.out.format("Scanning %s ...\n", dir);
-            registerAll(dir);
-            System.out.println("Done.");
-        } else {
-            register(dir);
-        }
+        System.out.format("Scanning %s ...\n", dir);
+        registerAll(dir);
+        System.out.println("Done.");
 
         // enable trace after initial registration
         this.trace = true;
