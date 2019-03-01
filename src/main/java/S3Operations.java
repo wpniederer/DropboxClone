@@ -1,8 +1,11 @@
+import java.net.URI;
 import java.nio.file.Path;
 import java.util.HashSet;
 
+import software.amazon.awssdk.auth.credentials.AnonymousCredentialsProvider;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.S3Configuration;
 import software.amazon.awssdk.services.s3.model.*;
 import software.amazon.awssdk.core.sync.RequestBody;
 
@@ -15,6 +18,17 @@ public class S3Operations {
         Region region = Region.US_WEST_1;
         s3 = S3Client.builder().region(region).build();
         this.filename = filename;
+    }
+
+    // For testing
+    S3Operations(Path filename, boolean isTest) {
+        s3 = S3Client.builder().endpointOverride(URI.create("http://localhost:8001"))
+                .credentialsProvider(AnonymousCredentialsProvider.create())
+                .region(Region.US_WEST_2)
+                .serviceConfiguration(S3Configuration.builder().pathStyleAccessEnabled(true).build())
+                .build();
+
+        s3.createBucket(CreateBucketRequest.builder().bucket("test").build());
     }
 
     public void add() {
