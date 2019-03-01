@@ -16,7 +16,13 @@ public class StorageDriver {
 
         for (;;) {
 
-            WatchKey key = watchDir.getKey();
+            WatchKey key;
+            try {
+                key = watchDir.getKey();
+            } catch (InterruptedException e) {
+                return;
+            }
+
             if (watchDir.keyToDir(key) == null) {
                 continue;
             }

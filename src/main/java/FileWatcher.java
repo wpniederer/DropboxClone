@@ -60,10 +60,12 @@ public class FileWatcher {
         this.trace = true;
     }
 
-    @SuppressWarnings("unchecked")
-    static <T> WatchEvent<T> cast(WatchEvent<?> event) {
-        return (WatchEvent<T>) event;
+    // For testing
+    FileWatcher() throws IOException {
+        this.watcher = FileSystems.getDefault().newWatchService();
+        this.keys = new HashMap<WatchKey, Path>();
     }
+
 
     /**
      * Register the given directory with the WatchService
@@ -101,11 +103,11 @@ public class FileWatcher {
 
 
     // Waits for key to be signalled
-    public WatchKey getKey() {
+    public WatchKey getKey() throws InterruptedException{
         WatchKey key;
-        try {
-            key = watcher.take();
-        } catch (InterruptedException x) {
+        key = watcher.take();
+
+        if (key == null) {
             return null;
         }
 
@@ -129,6 +131,18 @@ public class FileWatcher {
     public boolean isEmpty() {
         return keys.isEmpty();
     }
+
+    // For testing
+    public HashSet<String> dirList() {
+        HashSet<String> dirList = new HashSet<>();
+        for (Path dir: keys.values()) {
+            dirList.add(dir.toString());
+        }
+
+        return dirList;
+    }
+
+
 
 
 }
