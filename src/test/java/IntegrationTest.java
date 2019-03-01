@@ -12,7 +12,7 @@ import java.util.HashSet;
 public class IntegrationTest {
     private int wait = 3000;
     private Path parentDir = Paths.get("test_dir");
-    Path pathToFile = Paths.get("test_dir/testFile.txt");
+    private Path pathToFile = Paths.get("test_dir/testFile.txt");
 
     @Before
     public void setup() throws IOException {

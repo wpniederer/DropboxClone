@@ -8,10 +8,11 @@ import static java.nio.file.LinkOption.NOFOLLOW_LINKS;
 import static java.nio.file.StandardWatchEventKinds.*;
 
 public class StorageDriver {
+    private final static Path syncDir = Paths.get("my_dir");
 
     // Watches files and syncs as needed
-    private static void driver() throws IOException {
-        FileWatcher watchDir = new FileWatcher(Paths.get("my_dir"));
+    private static void syncDriver() throws IOException {
+        FileWatcher watchDir = new FileWatcher(syncDir);
 
         for (;;) {
 
@@ -97,7 +98,7 @@ public class StorageDriver {
 
     public static void main(String[] args) throws IOException {
         // Watches for Directory changes, syncs changes
-        driver();
+        syncDriver();
 
     }
 

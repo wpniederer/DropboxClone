@@ -9,20 +9,13 @@ import software.amazon.awssdk.core.sync.RequestBody;
 public class S3Operations {
     private S3Client s3;
     private Path filename;
-    Region region = Region.US_WEST_1;
     private final static String bucket = "storagecube-us-west-1";
-    private final static long sleep = 2000;
-
 
     S3Operations(Path filename) {
+        Region region = Region.US_WEST_1;
         s3 = S3Client.builder().region(region).build();
         this.filename = filename;
     }
-
-//    S3Operations() {
-//        s3 = S3Client.builder().region(region).
-//                build();
-//    }
 
     public void add() {
         System.out.println("Adding " + filename.toString() + " in " + bucket);
